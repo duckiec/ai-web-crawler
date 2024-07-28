@@ -1,13 +1,19 @@
-# crawler_streamlit.py
 import streamlit as st
 import requests
+from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup
 import pandas as pd
 from io import StringIO, BytesIO
 import zipfile
 from urllib.parse import urlparse, urljoin
+from collections import defaultdict
+import logging
+import time
 
-def extract_links(url, include_types, exclude_types, depth, include_external, visited=None):
+logging.basicConfig(filename='crawler.log', level=logging.ERROR)
+
+def extract_links(url, include_types, exclude_types, depth, include_external, visited=None, auth=None, rate_limit=None, user_agent=None):
+    headers = {'User-Agent': user_agent} if user_agent else {}
     if visited is None:
         visited = set()
 
@@ -17,7 +23,7 @@ def extract_links(url, include_types, exclude_types, depth, include_external, vi
     visited.add(url)
     links = []
     try:
-        response = requests.get(url)
+        response = requests.get(url, auth=auth, headers=headers)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         for a in soup.find_all('a', href=True):
@@ -33,8 +39,11 @@ def extract_links(url, include_types, exclude_types, depth, include_external, vi
                     continue
             links.append(link)
             if depth > 0:
-                links.extend(extract_links(link, include_types, exclude_types, depth - 1, include_external, visited))
+                links.extend(extract_links(link, include_types, exclude_types, depth - 1, include_external, visited, auth, rate_limit, user_agent))
+            if rate_limit:
+                time.sleep(rate_limit)
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching {url}: {e}")
         st.error(f"Error fetching {url}: {e}")
 
     return links
@@ -52,32 +61,43 @@ def main():
     exclude_types = st.text_input("Exclude file types (comma-separated, e.g., .pdf,.jpg):")
     depth = st.number_input("Depth of crawling:", min_value=0, max_value=10, value=1)
     include_external = st.checkbox("Include external links", value=True)
+    auth_user = st.text_input("Basic Auth Username:")
+    auth_pass = st.text_input("Basic Auth Password:", type="password")
+    rate_limit = st.number_input("Rate limit (seconds):", min_value=0.0, step=0.1)
+    user_agent = st.text_input("User-Agent:")
+    
+    auth = HTTPBasicAuth(auth_user, auth_pass) if auth_user and auth_pass else None
 
     if st.button("Extract Links"):
         all_links = []
-        url_links = {}
+        url_links = defaultdict(list)
+        file_type_count = defaultdict(int)
 
         def add_links(url, links):
             if unique_links:
                 links = list(set(links))
-            url_links[url] = links
+            url_links[url].extend(links)
             all_links.extend(links)
+            for link in links:
+                ext = link.split('.')[-1]
+                file_type_count[ext] += 1
 
         include_types_list = [t.strip() for t in include_types.split(',')] if include_types else []
         exclude_types_list = [t.strip() for t in exclude_types.split(',')] if exclude_types else []
 
         if url:
-            links = extract_links(url, include_types_list, exclude_types_list, depth, include_external)
+            links = extract_links(url, include_types_list, exclude_types_list, depth, include_external, auth=auth, rate_limit=rate_limit, user_agent=user_agent)
             add_links(url, links)
 
         if bulk_input:
             urls = bulk_input.splitlines()
             for u in urls:
-                links = extract_links(u, include_types_list, exclude_types_list, depth, include_external)
+                links = extract_links(u, include_types_list, exclude_types_list, depth, include_external, auth=auth, rate_limit=rate_limit, user_agent=user_agent)
                 add_links(u, links)
 
         if show_counts:
             st.write({url: len(links) for url, links in url_links.items()})
+            st.write("File type counts:", dict(file_type_count))
 
         if all_links:
             st.success(f"Extracted {len(all_links)} links.")
