@@ -17,8 +17,10 @@ AI Web Crawler is a web scraping tool built with Python and Streamlit completely
 
 
 
-`git clone https://github.com/yourusername/ai-web-crawler.git
-cd ai-web-crawler`
+`git clone https://github.com/yourusername/ai-web-crawler.git`
+
+
+`cd ai-web-crawler`
 
 
 Install Dependencies:
