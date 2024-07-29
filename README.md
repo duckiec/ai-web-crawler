@@ -26,7 +26,7 @@ AI Web Crawler is a web scraping tool built with Python and Streamlit completely
 Install Dependencies:
 
 
-`pip install -r requirements.txt requirements.txt:`
+`pip install -r requirements.txt `
 
 requirements.txt: 
 - streamlit
