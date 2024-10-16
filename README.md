@@ -47,3 +47,5 @@ Input URLs: Upload a CSV/TXT file or enter URLs directly.
 Filters (Optional): Choose to include or exclude links by file types or keywords.
 Additional Options: Set crawl depth, external links, rate limits, and user-agent.
 Download Results: Choose CSV or TXT format, and optionally save one file per domain as a ZIP.
+
+403 Forbidden Error usually means that the URL has mesures to prevent bots or scrapers in general.
