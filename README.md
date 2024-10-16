@@ -1,4 +1,4 @@
-Here’s an updated version of your README for the AI Web Crawler project. It includes some clarifications and formatting improvements for better readability:
+
 
 ```markdown
 # AI Web Crawler
@@ -57,4 +57,4 @@ streamlit run app.py
 - Fixed a minor typo in the "Installation" section and clarified the `requirements.txt` explanation.
 - Removed unnecessary repetition for clarity.
 
-Feel free to modify any part to better suit your project's style or details!
+
