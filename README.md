@@ -1,7 +1,7 @@
 
 # AI Web Crawler
 Overview
-AI Web Crawler is a web scraping tool built with Python and Streamlit completely **written by AI**. It extracts and filters links from single or multiple URLs and handles dynamic content with Selenium. This project was developed with the help of AI.
+AI Web Crawler is a web scraping tool built with Python and Streamlit completely **written by AI**. It extracts and filters links from single or multiple URLs and handles dynamic content with Selenium. 
 
 # Features
 - Dynamic Content Loading: Use Selenium for pages with dynamic content.
